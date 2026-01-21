@@ -34,4 +34,6 @@ repos:
     hooks:
       - id: commitizen
       - id: commitizen-branch
-        stages: [pre-push]
+        args: ["--rev-range", "$PRE_COMMIT_FROM_REF..$PRE_COMMIT_TO_REF"]
+        stages:
+          - pre-push
