@@ -1,0 +1,37 @@
+# SPDX-FileCopyrightText: 2026 Gaby Roch
+# SPDX-License-Identifier: GPL-3.0-or-later
+[init]
+	defaultBranch = main
+	templatedir = ~/.git_template
+[user]
+	name = Gaby Roch
+	email = gaby.roch@heig-vd.ch
+[core]
+	editor = vim
+[commit]
+	gpgSign = true
+[log]
+	showSignature = true
+
+[tag]
+  gpgSign = true
+
+[merge]
+  verifySignatures = true
+
+[url "grh.github.com:"]
+  insteadOf = grh@github.com:
+[url "aes.github.com:"]
+  insteadOf = aes@github.com:
+
+[diff "gpg"]
+	binary = true
+	textconv = gpg -d --quiet --yes --compress-algo=none --no-encrypt-to --batch --use-agent
+[diff "sqlite"]
+	binary = true
+	textconv = "echo .dump | sqlite3"
+
+[url "grh.gitlab.com:"]
+  insteadOf = grh@gitlab.com:
+[url "aes.gitlab.com:"]
+  insteadOf = aes@gitlab.com:
