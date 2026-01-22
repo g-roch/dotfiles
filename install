@@ -1,3 +1,59 @@
 #!/bin/bash
 # SPDX-FileCopyrightText: 2026 Gaby Roch
 # SPDX-License-Identifier: GPL-3.0-or-later
+
+set -e
+
+HASHER=sha1sum
+DIFF="diff --color -u"
+
+old_hash() {
+  local file=$1
+  git log HEAD --no-show-signature --pretty="tformat:%H" -- "$file" |
+    while read commit; do
+      git show "$commit:$file" |
+        $HASHER |
+        cut -d' ' -f1
+    done |
+    sort -u
+}
+current_hash() {
+  local file=$1
+  $HASHER -- "$file" |
+    cut -d' ' -f1
+}
+check_install() {
+  local source=$1
+  local source_hash=$(current_hash "$source")
+  local dest=$2
+  if [ ! -e "$dest" ]; then
+    install -vD "$source" "$dest"
+  else
+    local dest_hash=$(current_hash "$dest")
+    if [ "$source_hash" != "$dest_hash" ]; then
+      local older_hash=$(old_hash "$source")
+      if [[ $older_hash = *"$dest_hash"* ]]; then
+        install -vD "$source" "$dest"
+      else
+        $DIFF "$dest" "$source"
+      fi
+    fi
+  fi
+}
+
+not_fully_install=0
+find dot/ -type f |
+  while read file; do
+    modified=$(git status --porcelain -- "$file")
+    if [ "$modified" != "" ]; then
+      echo "$file as uncommited change"
+      exit 1
+    else
+      dest=${file/#dot\//~/.}
+      if ! check_install "$file" "$dest"; then
+        exit 1
+      fi
+    fi
+  done
+
+echo "All installed"
